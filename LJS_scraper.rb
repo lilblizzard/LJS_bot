@@ -23,7 +23,9 @@ def find_matching_images(xml_url)
   # removing namespaces so that we can xpath - lazy but works
   manuscript_xml = Nokogiri::XML(open(xml_url)).remove_namespaces!
   # create array of all Nokogiri nodes where the tag is <surface>
-  manuscript_xml.xpath('//surface').to_a
+  # and the 'n' attribute starts with a number
+  manuscript_xml.xpath('//surface').select { |node| node['n'][0] =~ /\d/ }
+  # iterate through these nodes and choose 2 consecutive images (ie, 4v/5r)
 end
 
 url = random_manuscript_xml_url
