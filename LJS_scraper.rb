@@ -1,5 +1,6 @@
 require 'nokogiri'
 require 'open-uri'
+require 'down'
 
 @ljs_url = 'http://openn.library.upenn.edu/Data/0001/'
 @ljs_html = Nokogiri::HTML(open(@ljs_url))
@@ -18,7 +19,7 @@ def manuscript_xml(xml_url)
 end
 
 def manuscript_language(xml)
-  xml.xpath('//textLang/text()').first.text
+  xml.xpath('//textLang/text()')&.first&.text
 end
 
 def valid_xml?(xml)
@@ -49,6 +50,12 @@ def adjust_image_order(image_url_array)
   image_url_array.reverse
 end
 
+def download_images(image_url_array)
+  image_url_array.each { |url|
+    Down.download(url, destination: '/Users/patrick/work/LJS_bot/images')
+  }
+end
+
 valid_xml = false
 until valid_xml
   url = random_manuscript_xml_url
@@ -58,7 +65,7 @@ end
 
 matching_nodes = find_matching_nodes(xml)
 url_array = get_urls_from_nokogiri_nodes(matching_nodes)
-if manuscript_language(xml) =~ /arabic|hebrew/i
+if manuscript_language(xml) =~ /arabic|hebrew|persian|ottoman turkish|yiddish/i
   url_array.reverse!
   puts 'switched'
 else
@@ -68,6 +75,4 @@ end
 puts url
 puts manuscript_language(xml)
 puts url_array
-
-
-
+download_images(url_array)
