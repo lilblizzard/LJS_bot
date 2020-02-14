@@ -2,6 +2,7 @@ require 'nokogiri'
 require 'open-uri'
 require 'down'
 require 'dotenv/load'
+require 'twitter'
 
 @ljs_url = 'http://openn.library.upenn.edu/Data/0001/'
 @ljs_html = Nokogiri::HTML(open(@ljs_url))
@@ -73,9 +74,22 @@ else
   url_array
 end
 
+client = Twitter::REST::Client.new do |config|
+  config.consumer_key = ENV['API_KEY']
+  config.consumer_secret = ENV['API_SECRET_KEY']
+  config.access_token = ENV['ACCESS_TOKEN']
+  config.access_token_secret = ENV['ACCESS_TOKEN_SECRET']
+end
+
 puts url
 puts manuscript_language(xml)
 puts url_array
 url_array.each_with_index { |url, index|
   download_image(url, 'images/page_' + index.to_s + '.jpg')
 }
+media = %w[/Users/patrick/work/LJS_bot/images/page_0.jpg
+           /Users/patrick/work/LJS_bot/images/page_1.jpg].map { |filename|
+  File.new filename
+}
+
+client.update_with_media('', media)
