@@ -109,5 +109,7 @@ media = %w[/Users/patrick/work/LJS_bot/images/page_0.jpg
 main_tweet = client.update_with_media(manuscript_title(xml), media)
 summary_tweet = client.update(manuscript_summary(xml),
                               in_reply_to_status_id: main_tweet.id)
-link_tweet = client.update('See more here! ' + @ljs_url + 'html/' + @random_manuscript + '.html',
+link_tweet = client.update('Interested in this manuscript? Learn more here! ' +
+                               @ljs_url + 'html/' +
+                               @random_manuscript + '.html',
                            in_reply_to_status_id: summary_tweet.id)
