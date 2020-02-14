@@ -38,10 +38,6 @@ def manuscript_summary(xml)
   end
 end
 
-def manuscript_shelfmark(xml)
-  xml.xpath()
-end
-
 def valid_xml?(xml)
   page_array = xml.xpath('//surface').select { |node|
     node['n'] =~ /^\d+[rv]/
