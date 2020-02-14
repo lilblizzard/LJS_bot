@@ -1,6 +1,7 @@
 require 'nokogiri'
 require 'open-uri'
 require 'down'
+require 'dotenv/load'
 
 @ljs_url = 'http://openn.library.upenn.edu/Data/0001/'
 @ljs_html = Nokogiri::HTML(open(@ljs_url))
