@@ -24,6 +24,24 @@ def manuscript_language(xml)
   xml.xpath('//textLang/text()')&.first&.text
 end
 
+def manuscript_title(xml)
+  title = xml.xpath('//title').first.content
+  title.slice!(/LJS.*$/)
+end
+
+def manuscript_summary(xml)
+  summary = xml.xpath('//summary').first.content
+  if summary.length > 280
+    summary[0..250].gsub(/\s\w+$/, '...')
+  else
+    summary.slice!(/^([^.]+)/)
+  end
+end
+
+def manuscript_shelfmark(xml)
+  xml.xpath()
+end
+
 def valid_xml?(xml)
   page_array = xml.xpath('//surface').select { |node|
     node['n'] =~ /^\d+[rv]/
@@ -92,4 +110,8 @@ media = %w[/Users/patrick/work/LJS_bot/images/page_0.jpg
   File.new filename
 }
 
-client.update_with_media('', media)
+main_tweet = client.update_with_media(manuscript_title(xml), media)
+summary_tweet = client.update(manuscript_summary(xml),
+                              in_reply_to_status_id: main_tweet.id)
+link_tweet = client.update('See more here! ' + @ljs_url + 'html/' + @random_manuscript + '.html',
+                           in_reply_to_status_id: summary_tweet.id)
