@@ -50,10 +50,10 @@ def adjust_image_order(image_url_array)
   image_url_array.reverse
 end
 
-def download_images(image_url_array)
-  image_url_array.each { |url|
-    Down.download(url, destination: '/Users/patrick/work/LJS_bot/images')
-  }
+def download_image(url, dest)
+  open(url) do |u|
+    File.open(dest, 'wb') { |f| f.write(u.read) }
+  end
 end
 
 valid_xml = false
@@ -75,4 +75,6 @@ end
 puts url
 puts manuscript_language(xml)
 puts url_array
-download_images(url_array)
+url_array.each_with_index { |url, index|
+  download_image(url, 'images/page_' + index.to_s + '.jpg')
+}
