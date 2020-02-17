@@ -101,8 +101,8 @@ puts url_array
 url_array.each_with_index { |url, index|
   download_image(url, 'images/page_' + index.to_s + '.jpg')
 }
-media = %w[/Users/patrick/work/LJS_bot/images/page_0.jpg
-           /Users/patrick/work/LJS_bot/images/page_1.jpg].map { |filename|
+media = %w[/app/images/page_0.jpg
+           /app/images/page_1.jpg].map { |filename|
   File.new filename
 }
 
