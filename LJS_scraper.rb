@@ -32,7 +32,7 @@ end
 def manuscript_summary(xml)
   summary = xml.xpath('//summary').first.content
   if summary.length > 260
-    summary[0..260].gsub(/\s\w+$/, '...')
+    summary[0..260].gsub(/\s\w+\s*$/, '...')
   else
     summary.slice!(/^([^.]+)/)
   end
