@@ -62,10 +62,6 @@ def get_urls_from_nokogiri_nodes(nodes)
    @ljs_url + @random_manuscript + '/data' + second_url]
 end
 
-def adjust_image_order(image_url_array)
-  image_url_array.reverse
-end
-
 def download_image(url, dest)
   open(url) do |u|
     File.open(dest, 'wb') { |f| f.write(u.read) }
