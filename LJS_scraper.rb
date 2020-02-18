@@ -4,16 +4,18 @@ require 'down'
 require 'dotenv/load'
 require 'twitter'
 
-@ljs_url = 'http://openn.library.upenn.edu/Data/0001/'
-@ljs_html = Nokogiri::HTML(open(@ljs_url))
+LJS_URL = 'http://openn.library.upenn.edu/Data/0001/'.freeze
 
-def random_manuscript_xml_url
+def random_manuscript(directory_html)
   skip = ['Name', 'Last modified', 'Size', 'Parent Directory']
-  hrefs = @ljs_html.css('div#div_directory a').reject { |node|
+  hrefs = directory_html.css('div#div_directory a').reject { |node|
     skip.include? node.text
   }.map(&:text)
-  @random_manuscript = hrefs.sample.gsub('/', '')
-  "#{@ljs_url}#{@random_manuscript}/data/#{@random_manuscript}_TEI.xml"
+  hrefs.sample.gsub('/', '')
+end
+
+def make_url(manuscript_id)
+  "#{LJS_URL}#{manuscript_id}/data/#{manuscript_id}_TEI.xml"
 end
 
 def manuscript_xml(xml_url)
@@ -55,11 +57,11 @@ def find_matching_nodes(manuscript_xml)
   [page_array[random_page_index], page_array[random_page_index + 1]]
 end
 
-def get_urls_from_nokogiri_nodes(nodes)
+def get_urls_from_nokogiri_nodes(nodes, manuscript)
   first_url = '/' + nodes[0].children[5].attributes['url']
   second_url = '/' + nodes[1].children[5].attributes['url']
-  [@ljs_url + @random_manuscript + '/data' + first_url,
-   @ljs_url + @random_manuscript + '/data' + second_url]
+  [LJS_URL + manuscript + '/data' + first_url,
+   LJS_URL + manuscript + '/data' + second_url]
 end
 
 def download_image(url, dest)
@@ -70,13 +72,14 @@ end
 
 valid_xml = false
 until valid_xml
-  url = random_manuscript_xml_url
+  manuscript = random_manuscript(Nokogiri::HTML(open(LJS_URL)))
+  url = make_url(manuscript)
   xml = manuscript_xml(url)
   valid_xml = valid_xml?(xml)
 end
 
 matching_nodes = find_matching_nodes(xml)
-url_array = get_urls_from_nokogiri_nodes(matching_nodes)
+url_array = get_urls_from_nokogiri_nodes(matching_nodes, manuscript)
 if manuscript_language(xml) =~ /arabic|hebrew|persian|ottoman turkish|yiddish/i
   url_array.reverse!
   puts 'switched'
@@ -91,9 +94,6 @@ client = Twitter::REST::Client.new do |config|
   config.access_token_secret = ENV['ACCESS_TOKEN_SECRET']
 end
 
-puts url
-puts manuscript_language(xml)
-puts url_array
 url_array.each_with_index { |url, index|
   download_image(url, 'images/page_' + index.to_s + '.jpg')
 }
@@ -106,6 +106,10 @@ main_tweet = client.update_with_media(manuscript_title(xml), media)
 summary_tweet = client.update(manuscript_summary(xml),
                               in_reply_to_status_id: main_tweet.id)
 link_tweet = client.update('Interested in this manuscript? Learn more here! ' +
-                               @ljs_url + 'html/' +
+                               LJS_URL + 'html/' +
                                @random_manuscript + '.html',
                            in_reply_to_status_id: summary_tweet.id)
+
+puts url
+puts manuscript_language(xml)
+puts url_array
